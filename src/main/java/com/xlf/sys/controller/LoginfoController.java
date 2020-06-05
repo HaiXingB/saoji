@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xlf.sys.common.DataGridView;
+import com.xlf.sys.common.ResultObj;
 import com.xlf.sys.domain.Loginfo;
 import com.xlf.sys.service.LoginfoService;
 import com.xlf.sys.vo.LoginfoVo;
@@ -13,6 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
+
 
 /**
  * <p>
@@ -30,11 +36,10 @@ public class LoginfoController {
     private LoginfoService loginfoService;
 
     /**
-     * 查询全部
+     *  查询全部
      * */
     @RequestMapping("loadAllLoginfo")
     public DataGridView loadAllLoginfo(LoginfoVo loginfoVo){
-        System.out.println();
         IPage<Loginfo> page= new Page<>(loginfoVo.getPage(),loginfoVo.getLimit());
         QueryWrapper<Loginfo> queryWrapper = new QueryWrapper<>();
 
@@ -45,6 +50,38 @@ public class LoginfoController {
         queryWrapper.orderByDesc("logintime");
         this.loginfoService.page(page,queryWrapper);
         return new DataGridView(page.getTotal(),page.getRecords());
+    }
+
+    /**
+     *  删除
+     * */
+    @RequestMapping("deleteLoginfo")
+    public ResultObj deleteLoginfo(Integer id){
+        try {
+            this.loginfoService.removeById(id);
+            return ResultObj.DELETE_SUCCESS;
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResultObj.DELETE_ERROR;
+        }
+    }
+
+    /**
+     *  批量删除
+     * */
+    @RequestMapping("batchDelectLoginfos")
+    public ResultObj batchDelectLoginfos(LoginfoVo loginfoVo){
+        try {
+            Collection<Serializable> idList = Arrays.asList(loginfoVo.getIds());
+            for(Integer id: loginfoVo.getIds()){
+                idList.add(id);
+            }
+            this.loginfoService.removeByIds(idList);
+            return ResultObj.DELETE_SUCCESS;
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResultObj.DELETE_ERROR;
+        }
     }
 }
 
